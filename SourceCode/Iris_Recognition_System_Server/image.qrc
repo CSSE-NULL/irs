@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/device.png</file>
+        <file>image/device_focus.png</file>
+        <file>image/host.png</file>
+        <file>image/host_focus.png</file>
+        <file>image/logo.png</file>
+        <file>image/main.png</file>
+        <file>image/msg_correct.png</file>
+        <file>image/msg_error.png</file>
+        <file>image/msg_question.png</file>
+        <file>image/record.png</file>
+        <file>image/record_focus.png</file>
+        <file>image/titleclose.png</file>
+        <file>image/titlemax.png</file>
+        <file>image/titlemenu.png</file>
+        <file>image/titlemini.png</file>
+        <file>image/user.png</file>
+        <file>image/user_focus.png</file>
+    </qresource>
+</RCC>
