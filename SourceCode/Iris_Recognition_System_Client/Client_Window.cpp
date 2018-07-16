@@ -36,99 +36,61 @@ void Client_Window::on_pushButton_exit_clicked()
 
 void Client_Window::on_pushButton_submit_clicked()
 {
-    //初始化socket
     socket = new QTcpSocket;
     connect(socket,SIGNAL(readyRead()),this,SLOT(slotReadData()));
     socket->connectToHost(QHostAddress::LocalHost,8080);
 
-    //连接数据库
-    QSqlDatabase db;
-    if(QSqlDatabase::contains("qt_sql_default_connection"))
-      db = QSqlDatabase::database("qt_sql_default_connection");
-    else
-      db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("../db/irs.db");
-    if(db.open()){
-        //获取虹膜图片路径字符串
-        QString device_id = ui->lineEdit_device_id->text();
-        QString Qpath = ui->lineEdit_scanner->text();
-        std::string  spath = Qpath.toStdString();
-        int i;char path[1000];
-        for(i=0;i<spath.length();i++) path[i]=spath[i];
-        path[i]='\0';
+    //获取虹膜图片路径字符串
+    QString device_id = ui->lineEdit_device_id->text();
+    QString Qpath = ui->lineEdit_scanner->text();
+    std::string  spath = Qpath.toStdString();
+    int i;char path[1000];
+    for(i=0;i<spath.length();i++) path[i]=spath[i];
+    path[i]='\0';
+    //将QString转换成IRIS结构体
+    OsiManager::Result iris = scan(path);
+    QByteArray block; //用于暂存我们要发送的数据
+    QDataStream out(&block,QIODevice::WriteOnly);
+    //使用数据流写入数据
+    out<<(quint16)0;
+    char msg[40000];
+    strcat(msg,iris.code);
+    strcat(msg,",");
+    strcat(msg,iris.mask);
+    strcat(msg,",");
 
-        //进行识别
-        OsiManager::Result iris = scan(path);
-        int flag=0;
-        QSqlQuery query;
-        query.exec("select irisdata,mask,user_id,user_authority from user");
-        while(query.next())
-        {
-            QString  Qirisdata = query.value(0).toString();
-            std::string  Sirisdata = Qirisdata.toStdString();
-            const char* irisdata = Sirisdata.c_str();
-            int longNDB[2 * LEN][2];
-            GetBinaryArray(irisdata, longNDB);//获取统计信息
+    for(int i=0;i<STN;i++){
+        strcat(msg,iris.shift_code[i]);
+        strcat(msg,",");
+    }
+    strcat(msg,device_id.toStdString().c_str());
+    out<<msg;
+    out.device()->seek(0);
+    out<<(quint16)(block.size()-sizeof(quint16));
+    //我们获取已经建立的连接的子套接字
+    socket->write(block);
+}
 
-            QString  Qmask = query.value(1).toString();
-            std::string  Smask = Qmask.toStdString();
-            const char* mask = Smask.c_str();
-            QString user_id = query.value(2).toString();
-            QString user_authority = query.value(3).toString();
+void Client_Window::slotReadData()
+{
+    if (socket->bytesAvailable()>0) {
+        QString result;
+        QByteArray ba;
+        ba.resize(socket->bytesAvailable());
+        socket->read(ba.data(),ba.size());
+        result = QString(ba);
 
-            if(Recognition(iris,longNDB,mask))
-            {
-                QSqlQuery query_device_authority;
-                query_device_authority.exec("select device_authority from device where device_id = '" + device_id + "';");
-                query_device_authority.first();
-                QString device_authority = query_device_authority.value(0).toString();
-                if(transform(user_authority) <= transform(device_authority))
-                {
-                    flag=1;
-                    QTextStream in(socket);
-                    in<<user_id<<","<<device_id;
-                    Message_Correct msg;
-                    msg.setMessage("成功");
-                    msg.exec();
-                    break;
-                }
-            }
-        }
-        if(!flag) {
+        if (result == "true") {
+            Message_Correct msg;
+            msg.setMessage("成功");
+            msg.exec();
+        } else if (result == "false") {
             Message_Error msg;
             msg.setMessage("失败");
             msg.exec();
         }
-
-    }else{
-        Message_Error msg;
-        msg.setMessage("数据库连接失败，请检查网络！！！");
-        msg.exec();
-    }
-
-}
-
-int Client_Window::transform(QString QString_authority)
-{
-    if(QString_authority == "Level_1")
-    {
-        return 1;
-    }else if(QString_authority == "Level_2")
-    {
-        return 2;
-    }
-    else if(QString_authority == "Level_3"){
-        return 3;
-    }else{
-        //当没有对应设备时
-        return 0;
-    }
-}
-
-
-void Client_Window::slotReadData()
-{
         socket->close();
+    }
 }
 
 //最小化按钮

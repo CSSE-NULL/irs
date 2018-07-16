@@ -35,7 +35,6 @@ private slots:
 
 private:
     Ui::Client_Window *ui;
-    int transform(QString);
     QTcpSocket *socket;
 
 };
