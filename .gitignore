@@ -4,4 +4,10 @@ release/
 Makefile.*
 *.Debug
 *.Release
+*.txt
+*.bmp
+SourceCode/Iris_Recognition_System_Client/code/*
+SourceCode/Iris_Recognition_System_Client/result/*
+SourceCode/Iris_Recognition_System_Server/code/*
+SourceCode/Iris_Recognition_System_Server/result/*
 

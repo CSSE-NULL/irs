@@ -54,6 +54,8 @@ SOURCES += \
 HEADERS += \
     Function/Mysql_Operation.h \
     Function/appinit.h \
+    Function/Recognition.h \
+    Function/NDBManipulate.h\
     UI/Dialog/Dialog_Device_Add.h \
     UI/Dialog/Dialog_Device_Change.h \
     UI/Dialog/Dialog_User_Add.h \

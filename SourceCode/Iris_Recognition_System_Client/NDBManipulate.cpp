@@ -3,19 +3,19 @@ using namespace std;
 
 /******************************
 登记：
-虹膜扫描（胡乾）给出一个scanResult[]（包括虹膜信息明文+掩码）
+虹膜扫描给出一个scanResult[]（包括虹膜信息明文+掩码）
 调用Register()登记
 
 识别：
 调用GetBinaryArray得到一个虹膜图像的负数据信息统计结果statisticCnt[][]
-送到识别函数（邢成浩）计算海明距离
+送到识别函数计算海明距离
 
 ******************************/
 double pridiction[4] = { 0, 0.95, 0.03, 0.02 };
 double r = 8;		//负数据库生成参数
 
 //functions
-char* Transfer(char* obj) {
+char* Transfer(OsiManager::Result &obj) {
 
     char irisCode[10000];
 
@@ -25,7 +25,7 @@ char* Transfer(char* obj) {
 	//生成负数据库字符串
 	char zeroNum[10001] = { 0 };
 	char oneNum[10001] = { 0 };
-    CreateNegativeString(obj, r, zeroNum, oneNum);
+    CreateNegativeString(obj.code, r, zeroNum, oneNum);
 
     //拼接到irisCode
 	strcpy(irisCode, zeroNum);
@@ -41,7 +41,8 @@ void CreateNegativeString(char irisCode[], double r, char zeroNum[], char oneNum
 	//01数量信息保存到zeroNum,oneNum字符串
 	//返回irisCode长度
 
-    int num = int(LEN*r + 0.5);
+	int codeLen = strlen(irisCode);
+	int num = int(codeLen*r + 0.5);
 	int zeroCnt[2001];
 	int oneCnt[2001];
 	memset(zeroCnt, 0, sizeof(zeroCnt));
@@ -54,7 +55,7 @@ void CreateNegativeString(char irisCode[], double r, char zeroNum[], char oneNum
 
 	do
 	{
-        GenerateRandomNumbers(v, LEN);			//tools.h
+		GenerateRandomNumbers(v, codeLen);			//tools.h
 		randPbt = Rand1();							//tools.h
         if (randPbt < pridiction[1])
 		{
@@ -101,7 +102,7 @@ void CreateNegativeString(char irisCode[], double r, char zeroNum[], char oneNum
 
 	//统计结果写入字符串
 	//每位统计结果以'#'分割
-    for (int i = 0; i < LEN; i++) {
+	for (int i = 0; i < codeLen; i++) {
 		//0
 		itoa(zeroCnt[i], curNum, 10);
 		strcat(curNum, "#");
@@ -121,6 +122,7 @@ void GetBinaryArray(char irisCode[], int statisticCnt[][2])
 	//记录到statisticCnt[M][2]
 	//第一列统计0
 	//第二列统计1
+	//codeLen是统计汇总前irisCode长度
 
     memset(statisticCnt, 0, sizeof(int) * 2 * LEN);
 	int i, j, num;

@@ -75,7 +75,7 @@ void Tab_User::on_pushButton_add_clicked()
     //将QString转换成IRIS结构体
     OsiManager::Result temp = scan(path);
     //将temp加密为irisdata字符串
-    char* irisdata = Transfer(temp);
+    char* irisdata = Transfer(temp.code);
     value << irisdata;
     value << temp.mask;
     value << QDateTime::currentDateTime().toString("yyyy/M/d hh:mm");
@@ -129,7 +129,7 @@ void Tab_User::on_pushButton_change_clicked()
             //将QString转换成IRIS结构体
             OsiManager::Result temp = scan(path);
             //将temp加密为irisdata字符串
-            char* irisdata = Transfer(temp);
+            char* irisdata = Transfer(temp.code);
             value << irisdata;
             value << temp.mask;
 

@@ -130,7 +130,7 @@ bool Mysql_Operation::login(QString admin_name, QString admin_password)
 }
 
 //验证用户虹膜和权限信息
-bool Mysql_Operation::identity_verification(OsiManager::Result iris_struct, QString &user_id,QString device_id)
+bool Mysql_Operation::identity_verification(OsiManager::Result iris, char* init_irisdata, QString &user_id,QString device_id)
 {
 //查询user表中所有的虹膜，掩码信息和用户权限，进行验证，如果验证通过，则找到user_id并返回true，验证失败返回false
     QSqlQuery query;
@@ -141,17 +141,18 @@ bool Mysql_Operation::identity_verification(OsiManager::Result iris_struct, QStr
         QString  Qirisdata = query.value(0).toString();
         std::string  Sirisdata = Qirisdata.toStdString();
         const char* irisdata = Sirisdata.c_str();
-        int longNDB[2 * LEN][2];
+        int longNDB[LEN][2];
+        int init_longNDB[LEN][2];
+        qDebug()<<init_irisdata<<endl;
         GetBinaryArray(irisdata, longNDB);
-
+        GetBinaryArray(init_irisdata, init_longNDB);
         QString  Qmask = query.value(1).toString();
         std::string  Smask = Qmask.toStdString();
         const char* mask = Smask.c_str();
 
         QString user_authority = query.value(3).toString();
-
         //验证虹膜信息
-        if(Recognition(iris_struct,longNDB,mask))
+        if(Recognition(iris,init_longNDB,longNDB))
         {
             user_id = query.value(2).toString();
 

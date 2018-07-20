@@ -36,7 +36,7 @@ SOURCES += \
     OsiEye.cpp\
     OsiProcessings.cpp\
     OsiCircle.cpp\
-    Recognition.cpp
+    NDBManipulate.cpp
 
 HEADERS += \
     Client_Window.h \
@@ -52,7 +52,7 @@ HEADERS += \
     highgui.h\
     OsiStringUtils.h\
     OsiCircle.h\
-    Recognition.h
+    NDBManipulate.h
 
 
 FORMS += \

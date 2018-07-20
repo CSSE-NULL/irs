@@ -10,7 +10,8 @@
 #include <QDataStream>
 #include <QMessageBox>
 #include "Scan.h"
-#include "Recognition.h"
+#include "NDBManipulate.h"
+
 namespace Ui {
 class Client_Window;
 }

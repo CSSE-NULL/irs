@@ -53,8 +53,10 @@ void Client_Window::on_pushButton_submit_clicked()
     QDataStream out(&block,QIODevice::WriteOnly);
     //使用数据流写入数据
     out<<(quint16)0;
-    char msg[40000];
-    strcat(msg,iris.code);
+    char msg[50000];
+    memset(msg,0,50000);
+    char* irisdata = Transfer(iris);
+    strcat(msg,irisdata);
     strcat(msg,",");
     strcat(msg,iris.mask);
     strcat(msg,",");

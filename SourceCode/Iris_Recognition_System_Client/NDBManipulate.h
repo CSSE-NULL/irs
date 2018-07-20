@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <string.h>
 #include <time.h>
-#include "Scan/OsiManager.h"
+#include "OsiManager.h"
 using namespace osiris;
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -22,7 +22,7 @@ extern double pridiction[4];
 extern double r;
 
 //functions
-char* Transfer(char* obj);
+char* Transfer(OsiManager::Result &obj);
 
 //void SeparateMaskCode(char scanResult[], char irisCode[], char maskCode[]);
 

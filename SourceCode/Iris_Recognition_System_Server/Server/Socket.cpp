@@ -25,10 +25,10 @@ void Socket::readDataSlot()
         }
         if(this->bytesAvailable() < blockSize) return;
         //如果没有得到全部的数据，则返回，继续接收数据
-        QByteArray ba;
+        QByteArray ba("");
         ba.resize(this->bytesAvailable());
         this->read(ba.data(),ba.size());
-     emit sockReadDataSignal(this->socketDescriptor(),(QString)ba.mid(15));
+     emit sockReadDataSignal(this->socketDescriptor(),(QString)ba.mid(4));
 }
 
 

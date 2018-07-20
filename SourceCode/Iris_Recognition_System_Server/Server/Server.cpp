@@ -36,17 +36,16 @@ void Server::handle(qintptr sockfd, QString msg)
     //找到list中存放的对应的socket
     for (int i = 0; i < clients.size(); ++i)
     {
-        qDebug()<<clients.size()<<endl;
-        qDebug()<<clients.at(i)->socketDescriptor()<<endl;
         if (clients.at(i)->socketDescriptor() == sockfd)
         {
             //新建user_id，用于发送到主窗体添加record记录，再验证过程中初始化
             OsiManager::Result iris;
+            char irisdata[10000];
+            memset(irisdata,0,10000);
             memset(iris.code,0,M);
             memset(iris.mask,0,M);
-            strcpy(iris.code, msg.split(",").at(0).toStdString().c_str()) ;
+            strcpy(irisdata, msg.split(",").at(0).toStdString().c_str()) ;
             strcpy(iris.mask,msg.split(",").at(1).toStdString().c_str());
-            qDebug()<<iris.code<<endl;
             for(int i=0;i<STN;i++){
                 memset(iris.shift_code[i],0,M);
                 strcat(iris.shift_code[i],msg.split(",").at(i+2).toStdString().c_str());
@@ -54,7 +53,8 @@ void Server::handle(qintptr sockfd, QString msg)
             QString device_id = QString(msg).split(",").at(STN+2);
             QString user_id = "";
             Mysql_Operation *mysql_operation = new Mysql_Operation();
-            if(mysql_operation->identity_verification(iris,user_id,device_id))
+
+            if(mysql_operation->identity_verification(iris,irisdata,user_id,device_id))
             {
                 //验证通过则通过socket向client返回true，并发送user_id,device_id,time,status到主窗体添加record记录
                 QTextStream in(clients.at(i));

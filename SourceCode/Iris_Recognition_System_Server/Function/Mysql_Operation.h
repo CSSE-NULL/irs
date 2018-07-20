@@ -20,7 +20,7 @@ public:
     bool update(QString, QString, QStringList, QStringList);
     bool Delete(QString, QString);
     bool login(QString, QString);
-    bool identity_verification(OsiManager::Result iris_struct, QString &user_id,QString device_id);
+    bool identity_verification(OsiManager::Result iris, char* init_irisdata, QString &user_id,QString device_id);
 
 private:
     int transform(QString);

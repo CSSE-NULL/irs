@@ -2,74 +2,60 @@
 #include"recognition.h"
 #include<qdebug.h>
 using namespace std;
-int cn = (int)(LEN*8+0.5);
+int t = 8;
+int cn = (int)(LEN*t+0.5);
 double p[4] = { 0,0.95,0.03 ,0.02 };//0位不使用 p1 p2 p3
 
 /*
 计算海明距离所需函数
 */
-double h(double d)
+double h(int d)
 {
-	double tt = 1.0*d / cn;
-	double t1 = 0.5;
-	double t2 = 4 * p[1] + 2 * p[2] - 3;
-	double t3 = 2 * tt - 3;
-	double res = t1 * (1 + t3 / t2);
-	return res;
-}
+    double nsame= (2*p[1]+p[2])/3*t*3;
+    double ndiff= t*3-nsame;
+    double t1 = 2*nsame*ndiff;
+    double t2 = nsame*nsame+ndiff*ndiff;
+    double res = (t1*LEN-d)/(t1-t2);
+//    qDebug() << nsame << "   " << ndiff << "   " << t1 << "   " << t2 << "   " << res << endl;
+    return res/LEN;
 
+}
 /*
 计算海明距离
 */
-//海明距离begin*******************************
-//hamming distance with mask but without shift
-double NDBHamDisMask(char s[], char sm[], int longNDB[][2], const char smask[])
-{
-	int i, k;
-	int dis = 0;
-	int dn = 0;
-    for (i = 0; i < LEN; i++)
-	{
-		if ((smask[i] == '1') && (sm[i] == '1'))
-			dn++;
-	}
-    for (i = 0; i < LEN; i++)
-	{
-		if ((smask[i] == '1') && (sm[i] == '1'))
-		{
-            if (s[i] == '0')
-			{
-				dis += longNDB[i][1];
-			}
-            else if (s[i] == '1') {
-				dis += longNDB[i][0];
-			}
-		}
-	}
-    return h(dis*LEN / dn);
+
+double NDBHamDis(int init_longNDB[LEN][2],int longNDB[LEN][2]){
+   int dis=0;
+   int i;
+   for (i = 0; i < LEN; i++){
+       dis += init_longNDB[i][0]*longNDB[i][1]+init_longNDB[i][1]*longNDB[i][0];
+   }
+//   qDebug()<<dis<<"   "<<h(dis)<<endl;
+   return h(dis);
 }
 
-
-double NDBHamDisMaskShift(OsiManager::Result irs, int longNDB[][2], const char smask[])
+double NDBHamDisShift(OsiManager::Result iris,int longNDB[LEN][2])
 {
     int i;
-	double dis = 1.0;
-	for (i = 0; i < STN; i++)
-	{
-        double temp = NDBHamDisMask(irs.shift_code[i],irs.mask, longNDB, smask);
-		if (dis > temp)
-			dis = temp;
-	}
-	return dis;
+    double dis = 1.0;
+    for(i=0;i<STN;i++)
+    {
+        char* irisdata = Transfer(iris.shift_code[i]);
+        int init_longNDB[LEN][2];
+        GetBinaryArray(irisdata, init_longNDB);
+        double temp = NDBHamDis(init_longNDB,longNDB);
+        if(dis>temp) dis = temp;
+
+    }
+
+    return dis;
 }
 
-
-double Ham(OsiManager::Result irs, int longNDB[][2], const char smask[])
+double Ham(OsiManager::Result iris,int init_longNDB[LEN][2], int longNDB[LEN][2])
 {
-    return NDBHamDisMaskShift(irs, longNDB, smask);
-    //return NDBHamDisMask(irs.code,irs.mask, longNDB, smask);
+    return NDBHamDisShift(iris,longNDB);
+//    return NDBHamDis(init_longNDB,longNDB);
 }
-//海明距离 end*************************************
 
 void GetBinaryArray(const char irisCode[], int statisticCnt[][2])
 {
@@ -110,9 +96,9 @@ void GetBinaryArray(const char irisCode[], int statisticCnt[][2])
     return;
 }
 
-int Recognition(OsiManager::Result iris, int longNDB[][2], const char smask[])
+int Recognition(OsiManager::Result iris,int init_longNDB[LEN][2], int longNDB[LEN][2])
 {
-	double v = Ham(iris, longNDB, smask);
+    double v = Ham(iris,init_longNDB, longNDB);
     qDebug() << QString::number(v)<<endl;
 	if (v < THRESHOLD)
 		return TRUE;
